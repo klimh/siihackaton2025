@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Survey - Mordzia Health Support{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Daily Survey</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Share your daily activities and habits</p>
+        </div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            {{ today.strftime('%A, %B %d, %Y') }}
+        </div>
+    </div>
+
+    <!-- Survey Form -->
+    <form id="surveyForm" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <!-- Activities Section -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Today's Activities</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for activity in activity_options %}
+                <div class="relative">
+                    <input type="checkbox" 
+                           id="activity_{{ activity.id }}" 
+                           name="activities" 
+                           value="{{ activity.id }}"
+                           class="peer hidden">
+                    <label for="activity_{{ activity.id }}" 
+                           class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer
+                                  border-2 border-transparent hover:border-blue-500
+                                  peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/30
+                                  transition-all duration-200">
+                        <i class="fas {{ activity.icon }} text-gray-500 dark:text-gray-400 mr-3"></i>
+                        <span class="text-gray-700 dark:text-gray-300">{{ activity.label }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Custom Activities Section -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Custom Activities</h2>
+            <div class="space-y-4">
+                {% for i in range(3) %}
+                <div class="relative">
+                    <input type="text" 
+                           id="custom_activity_{{ i }}" 
+                           name="custom_activities" 
+                           placeholder="Enter a custom activity..."
+                           maxlength="50"
+                           class="w-full p-3 bg-gray-50 dark:bg-gray-700 rounded-lg
+                                  border border-gray-300 dark:border-gray-600
+                                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                                  text-gray-700 dark:text-gray-300
+                                  placeholder-gray-500 dark:placeholder-gray-400">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Social Media Time Section -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Social Media Usage</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% for option in social_media_options %}
+                <div class="relative">
+                    <input type="radio" 
+                           id="social_{{ option.id }}" 
+                           name="social_media_time" 
+                           value="{{ option.value }}"
+                           class="peer hidden"
+                           {% if loop.first %}required{% endif %}>
+                    <label for="social_{{ option.id }}" 
+                           class="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer
+                                  border-2 border-transparent hover:border-blue-500
+                                  peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/30
+                                  transition-all duration-200">
+                        <span class="text-gray-700 dark:text-gray-300">{{ option.label }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end">
+            <button type="submit" 
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg
+                           hover:bg-blue-700 focus:ring-4 focus:ring-blue-300
+                           transition-colors duration-200
+                           disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-save mr-2"></i>
+                Save Survey
+            </button>
+        </div>
+    </form>
+
+    <!-- Success/Error Messages -->
+    <div id="successMessage" class="hidden mt-4 p-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span>Survey saved successfully!</span>
+    </div>
+    <div id="errorMessage" class="hidden mt-4 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span>Error saving survey. Please try again.</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/survey.js') }}"></script>
+{% endblock %} 

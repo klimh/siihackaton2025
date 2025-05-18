@@ -1,0 +1,70 @@
+/* Custom styles for Mental Health Support app */
+
+/* Smooth transitions for interactive elements */
+.transition-all {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Custom range input styling */
+input[type="range"] {
+    -webkit-appearance: none;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    transition: background 0.15s ease-in-out;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #2563eb;
+}
+
+/* Breathing circle animation */
+#breathingCircle {
+    transition: transform 2s ease-in-out;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Mood entry card styling */
+.mood-entry {
+    border-left: 4px solid transparent;
+}
+
+.mood-entry[data-mood="high"] {
+    border-left-color: #22c55e;
+}
+
+.mood-entry[data-mood="medium"] {
+    border-left-color: #eab308;
+}
+
+.mood-entry[data-mood="low"] {
+    border-left-color: #ef4444;
+} 

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Get Support - Mordzia Health Support{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8" data-recent-mood="{{ recent_mood if recent_mood is not none else 'null' }}">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-[#2563eb] dark:text-blue-600">Get Support</h1>
+            <div class="help-stats mt-2"></div>
+        </div>
+        <a href="{{ url_for('index') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+        </a>
+    </div>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8 emergency-contacts">
+        <h2 class="text-2xl font-semibold text-red-600 dark:text-red-700 mb-4">Emergency Contacts</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for contact in emergency_contacts %}
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-red-700 dark:text-red-700">{{ contact.name }}</h3>
+                <p class="text-xl font-bold text-red-600 dark:text-red-500">
+                    {% if contact.contact.startswith(('www', 'http')) %}
+                    <a href="{{ 'https://' + contact.contact if contact.contact.startswith('www') else contact.contact }}"
+                       target="_blank" rel="noopener noreferrer"
+                       class="hover:underline">
+                        {{ contact.contact }}
+                        <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                    </a>
+                    {% else %}
+                    <a href="tel:{{ contact.contact }}" class="hover:underline">
+                        {{ contact.contact }}
+                        <i class="fas fa-phone text-xs ml-1"></i>
+                    </a>
+                    {% endif %}
+                </p>
+                <p class="text-white mt-2">{{ contact.description }}</p>
+                <p class="text-sm text-white mt-1">Hours: {{ contact.hours }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-700 mb-4">Support Resources</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for contact in other_contacts %}
+            <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ contact.name }}</h3>
+                <p class="text-blue-600 dark:text-blue-200 font-medium">
+                    {% if contact.contact.startswith(('www', 'http')) %}
+                    <a href="{{ 'https://' + contact.contact if contact.contact.startswith('www') else contact.contact }}"
+                       target="_blank" rel="noopener noreferrer"
+                       class="hover:underline">
+                        {{ contact.contact }}
+                        <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                    </a>
+                    {% else %}
+                    <a href="tel:{{ contact.contact }}" class="hover:underline">
+                        {{ contact.contact }}
+                        <i class="fas fa-phone text-xs ml-1"></i>
+                    </a>
+                    {% endif %}
+                </p>
+                <p class="text-gray-600 dark:text-gray-200 mt-2">{{ contact.description }}</p>
+                <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">Hours: {{ contact.hours }}</p>
+                <div class="mt-2">
+                    <span class="inline-block px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 rounded">
+                        {{ contact.category | title }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-blue-800 dark:text-blue-800 mb-4">Important Information</h2>
+        <div class="prose dark:prose-invert max-w-none">
+            <ul class="list-disc list-inside text-gray-700 dark:text-gray-700 space-y-2">
+                <li>All emergency numbers are free to call from any phone</li>
+                <li>Crisis helplines provide confidential support 24/7</li>
+                <li>Online resources are available when you prefer not to talk on the phone</li>
+                <li>Professional help is available both in-person and online</li>
+                <li>Don't hesitate to reach out - support is always available</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

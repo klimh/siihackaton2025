@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Mordzia Health Support{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold text-blue-600 mb-8">Welcome to Mordzia Health Support</h1>
+    
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Your Journey to Better Mental Health</h2>
+        <p class="text-gray-700 mb-4">
+            Track your daily mood, practice relaxation techniques, and take control of your mental well-being.
+            Our platform provides tools and resources to support your mental health journey.
+        </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-blue-600 mb-4">Mood Journal</h3>
+            <p class="text-gray-700 mb-4">
+                Track your daily moods and emotions. Identify patterns and triggers to better understand your mental health.
+            </p>
+            <a href="{{ url_for('mood_journal') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Start Journaling
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-blue-600 mb-4">Relaxation Exercises</h3>
+            <p class="text-gray-700 mb-4">
+                Access guided breathing exercises and relaxation techniques to help manage stress and anxiety.
+            </p>
+            <a href="{{ url_for('relaxation') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Try Exercises
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

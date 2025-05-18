@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Mordzia Health Support{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-wrap -mx-4">
+        <!-- Left Column: Avatar and User Info -->
+        <div class="w-full md:w-1/3 px-4 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='avatars/' + current_user.avatar.filename) }}" 
+                         alt="User Avatar" 
+                         class="mx-auto rounded-full w-32 h-32 mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">{{ current_user.name }}</h2>
+                    <p class="text-gray-600">Member since {{ current_user.created_at.strftime('%B %Y') }}</p>
+                </div>
+                
+                <!-- Report Generation Section -->
+                <div class="mt-6 text-center">
+                    <button id="generateReportBtn" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                        Generate Report
+                    </button>
+                    <div id="reportStatus" class="mt-4 hidden">
+                        <div class="flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <span class="ml-2 text-gray-600">Generating report...</span>
+                        </div>
+                    </div>
+                    <div id="reportDownload" class="mt-4 hidden">
+                        <a href="#" 
+                           class="text-blue-500 hover:text-blue-600 underline"
+                           target="_blank">
+                            Download Report
+                        </a>
+                    </div>
+                    <div id="reportError" class="mt-4 hidden">
+                        <p class="text-red-500">Error generating report. Please try again.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Information -->
+        <div class="w-full md:w-2/3 px-4">
+            <h1 class="text-4xl font-bold text-blue-600 mb-8">Your Profile</h1>
+
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-2xl font-semibold mb-4">Account Information</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-500">Name</label>
+                                <p class="text-lg">{{ current_user.name }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-500">Email</label>
+                                <p class="text-lg">{{ current_user.email }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-500">Member Since</label>
+                                <p class="text-lg">{{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-semibold mb-4">Mood Statistics</h2>
+                        <div id="moodStats" class="space-y-4">
+                            <p class="text-gray-500">Loading statistics...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Mood Entries -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-2xl font-semibold mb-4">Recent Mood Entries</h2>
+                <div id="recentEntries" class="space-y-4">
+                    <!-- Entries will be populated by JavaScript -->
+                    <p class="text-gray-500">Loading entries...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadMoodEntries() {
+    const entriesDiv = document.getElementById('recentEntries');
+    const statsDiv = document.getElementById('moodStats');
+    
+    try {
+        const response = await fetch('/api/moods');
+        const entries = await response.json();
+        
+        if (entries.length === 0) {
+            entriesDiv.innerHTML = '<p class="text-gray-500">No mood entries yet.</p>';
+            statsDiv.innerHTML = '<p class="text-gray-500">No data available yet.</p>';
+            return;
+        }
+        
+        // Calculate statistics
+        const scores = entries.map(e => e.mood_score);
+        const avgMood = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+        const totalEntries = entries.length;
+        const recentMood = scores[0];
+        
+        // Update statistics
+        statsDiv.innerHTML = `
+            <div>
+                <label class="block text-gray-500">Average Mood</label>
+                <p class="text-lg">${avgMood}/10</p>
+            </div>
+            <div>
+                <label class="block text-gray-500">Total Entries</label>
+                <p class="text-lg">${totalEntries}</p>
+            </div>
+            <div>
+                <label class="block text-gray-500">Most Recent Mood</label>
+                <p class="text-lg">${recentMood}/10</p>
+            </div>
+        `;
+        
+        // Display recent entries (last 5)
+        const recentEntries = entries.slice(0, 5);
+        entriesDiv.innerHTML = recentEntries.map(entry => {
+            const moodLevel = entry.mood_score <= 3 ? 'low' : entry.mood_score <= 7 ? 'medium' : 'high';
+            const date = new Date(entry.timestamp).toLocaleString();
+            
+            return `
+                <div class="mood-entry bg-white p-4 rounded-lg shadow border-l-4" data-mood="${moodLevel}">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="font-semibold">Mood Score: ${entry.mood_score}/10</span>
+                            <span class="text-gray-500 text-sm ml-4">${date}</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">${entry.note || 'No notes provided'}</p>
+                </div>
+            `;
+        }).join('');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        entriesDiv.innerHTML = '<p class="text-red-500">Failed to load entries. Please try again later.</p>';
+        statsDiv.innerHTML = '<p class="text-red-500">Failed to load statistics.</p>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadMoodEntries);
+
+document.getElementById('generateReportBtn').addEventListener('click', async function() {
+    const statusDiv = document.getElementById('reportStatus');
+    const downloadDiv = document.getElementById('reportDownload');
+    const errorDiv = document.getElementById('reportError');
+    const button = this;
+    
+    // Reset UI
+    statusDiv.classList.remove('hidden');
+    downloadDiv.classList.add('hidden');
+    errorDiv.classList.add('hidden');
+    button.disabled = true;
+    
+    try {
+        const response = await fetch('/profile/report');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const downloadLink = downloadDiv.querySelector('a');
+            downloadLink.href = data.report.download_url;
+            downloadDiv.classList.remove('hidden');
+        } else {
+            throw new Error(data.message || 'Failed to generate report');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        errorDiv.classList.remove('hidden');
+        errorDiv.querySelector('p').textContent = error.message || 'Error generating report. Please try again.';
+    } finally {
+        statusDiv.classList.add('hidden');
+        button.disabled = false;
+    }
+});
+</script>
+{% endblock %} 

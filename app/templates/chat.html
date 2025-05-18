@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Chat Support - Mordzia Health Support{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6">Chat Support</h1>
+        
+        <!-- Chat Messages -->
+        <div id="chatMessages" class="space-y-4 mb-6 h-96 overflow-y-auto p-4 border rounded-lg">
+            <!-- Messages will be inserted here -->
+        </div>
+        
+        <!-- Message Input -->
+        <form id="chatForm" class="space-y-4">
+            <div>
+                <textarea id="messageInput"
+                         class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+                         rows="3"
+                         placeholder="Type your message here..."
+                         required></textarea>
+            </div>
+            <div class="flex justify-between items-center">
+                <button type="submit"
+                        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Send Message
+                </button>
+                <div id="debugInfo" class="text-sm text-gray-500">
+                    <!-- Debug information will be shown here -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const debugInfo = document.getElementById('debugInfo');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Load chat history
+    loadChatHistory();
+
+    async function loadChatHistory() {
+        try {
+            const response = await fetch('/api/chat/history', {
+                headers: { 'X-CSRF-TOKEN': csrfToken }
+            });
+            
+            if (!response.ok) throw new Error('Failed to load chat history');
+            
+            const messages = await response.json();
+            messages.forEach(addMessageToChat);
+        } catch (error) {
+            console.error('Error loading chat history:', error);
+            debugInfo.textContent = `Error loading history: ${error.message}`;
+        }
+    }
+
+    function addMessageToChat(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `p-3 rounded-lg ${message.sender === 'user' ? 'bg-blue-100 ml-12' : 'bg-gray-100 mr-12'}`;
+        messageDiv.innerHTML = `
+            <p class="text-sm text-gray-600 mb-1">${message.sender === 'user' ? 'You' : 'Assistant'}</p>
+            <p class="text-gray-800">${message.message}</p>
+            ${message.sentiment_score !== null ? 
+                `<p class="text-xs text-gray-500 mt-1">Sentiment: ${message.sentiment_score.toFixed(2)}</p>` : ''}
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        debugInfo.textContent = 'Sending message...';
+        
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ message })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to send message');
+            }
+            
+            const result = await response.json();
+            
+            // Add user message
+            addMessageToChat({
+                message: message,
+                sender: 'user',
+                sentiment_score: result.sentiment_score
+            });
+            
+            // Add AI response
+            addMessageToChat({
+                message: result.message,
+                sender: 'ai',
+                sentiment_score: null
+            });
+            
+            messageInput.value = '';
+            debugInfo.textContent = 'Message sent successfully';
+            
+        } catch (error) {
+            console.error('Error sending message:', error);
+            debugInfo.textContent = `Error: ${error.message}`;
+        }
+    });
+});
+</script>
+{% endblock %} 

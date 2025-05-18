@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+Mordzia
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold text-blue-600 mb-8">Relaxation Exercises</h1>
+
+    <!-- Breathing Exercise -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-semibold mb-4">4-7-8 Breathing Exercise</h2>
+        <div class="text-center mb-6">
+            <div id="breathingCircle" class="w-48 h-48 mx-auto rounded-full border-4 border-blue-500 flex items-center justify-center mb-4">
+                <span id="breathingText" class="text-2xl font-bold text-blue-600">Ready</span>
+            </div>
+            <button id="startBreathing" 
+                    class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Start Exercise
+            </button>
+        </div>
+        <div class="text-gray-700">
+            <p class="mb-4">The 4-7-8 breathing technique is a powerful tool for relaxation:</p>
+            <ol class="list-decimal list-inside space-y-2">
+                <li>Inhale quietly through your nose for 4 seconds</li>
+                <li>Hold your breath for 7 seconds</li>
+                <li>Exhale completely through your mouth for 8 seconds</li>
+                <li>Repeat the cycle 4 times</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Progressive Muscle Relaxation -->
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <h2 class="text-2xl font-semibold mb-4">Progressive Muscle Relaxation</h2>
+        <div class="text-gray-700">
+            <p class="mb-4">Follow these steps to release tension from your body:</p>
+            <ol class="list-decimal list-inside space-y-2">
+                <li>Find a comfortable position and close your eyes</li>
+                <li>Focus on your feet - tense them for 5 seconds, then relax</li>
+                <li>Move up to your calves - tense for 5 seconds, then relax</li>
+                <li>Continue this pattern moving up through your body</li>
+                <li>End with your facial muscles</li>
+                <li>Take a deep breath and notice how your body feels</li>
+            </ol>
+            <p class="mt-4">
+                Practice this exercise daily for best results. Remember to never tense to the point of pain.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('startBreathing').addEventListener('click', function() {
+        const circle = document.getElementById('breathingCircle');
+        const text = document.getElementById('breathingText');
+        const button = this;
+        button.disabled = true;
+        
+        const phases = [
+            { duration: 4000, text: 'Inhale', scale: 1.5 },
+            { duration: 7000, text: 'Hold', scale: 1.5 },
+            { duration: 8000, text: 'Exhale', scale: 1 }
+        ];
+        
+        let cycleCount = 0;
+        const totalCycles = 4;
+        
+        function runPhase(phaseIndex) {
+            if (cycleCount >= totalCycles) {
+                text.textContent = 'Complete';
+                button.disabled = false;
+                return;
+            }
+            
+            const phase = phases[phaseIndex];
+            text.textContent = phase.text;
+            circle.style.transform = `scale(${phase.scale})`;
+            circle.style.transition = `transform ${phase.duration}ms ease-in-out`;
+            
+            setTimeout(() => {
+                const nextPhase = (phaseIndex + 1) % phases.length;
+                if (nextPhase === 0) cycleCount++;
+                runPhase(nextPhase);
+            }, phase.duration);
+        }
+        
+        circle.style.transform = 'scale(1)';
+        runPhase(0);
+    });
+</script>
+{% endblock %} 

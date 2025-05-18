@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Mordzia Health Support{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+    <h1 class="text-2xl font-bold text-center mb-6">Create an Account</h1>
+    
+    <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <!-- Name -->
+        <div>
+            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+            <input type="text" 
+                   id="name" 
+                   name="name" 
+                   required
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" 
+                   id="email" 
+                   name="email" 
+                   required
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <!-- Password -->
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input type="password" 
+                   id="password" 
+                   name="password" 
+                   required
+                   minlength="8"
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <p class="mt-1 text-sm text-gray-500">Must be at least 8 characters long</p>
+        </div>
+
+        <!-- Avatar Selection -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-medium text-gray-900">Choose Your Avatar</h3>
+            
+            <!-- Avatar Selection with Arrows -->
+            <div class="flex flex-col items-center space-y-4">
+                <div class="flex items-center space-x-4">
+                    <button type="button" 
+                            id="prevAvatar" 
+                            class="bg-blue-500 text-white rounded-full p-2 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 active:bg-blue-700 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    
+                    <div class="relative">
+                        <img id="avatarPreview"
+                             src="{{ url_for('static', filename='avatars/avatar1.png') }}"
+                             alt="Avatar Preview"
+                             class="w-32 h-32 rounded-full object-cover border-4 border-blue-200">
+                        <input type="hidden" id="avatarSelect" name="avatar_id" value="1" required>
+                    </div>
+                    
+                    <button type="button" 
+                            id="nextAvatar" 
+                            class="bg-blue-500 text-white rounded-full p-2 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 active:bg-blue-700 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                <p id="avatarNumber" class="text-sm text-gray-600 font-medium">Avatar 1</p>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+            <button type="submit"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Create Account
+            </button>
+        </div>
+
+        <!-- Login Link -->
+        <div class="text-center text-sm text-gray-600">
+            Already have an account? 
+            <a href="{{ url_for('login') }}" class="font-medium text-blue-600 hover:text-blue-500">
+                Log in
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const errorDiv = document.getElementById('password-error');
+    
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        errorDiv.classList.remove('hidden');
+    } else {
+        errorDiv.classList.add('hidden');
+    }
+});
+</script>
+
+<!-- Add avatar handling script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const prevButton = document.getElementById('prevAvatar');
+    const nextButton = document.getElementById('nextAvatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarSelect = document.getElementById('avatarSelect');
+    const avatarNumber = document.getElementById('avatarNumber');
+    
+    let currentAvatarId = 1;
+    const totalAvatars = 4;
+
+    function updateAvatarDisplay() {
+        const avatarPath = `/static/avatars/avatar${currentAvatarId}.png`;
+        avatarPreview.src = avatarPath;
+        avatarSelect.value = currentAvatarId;
+        avatarNumber.textContent = `Avatar ${currentAvatarId}`;
+        
+        // Add error handling for image loading
+        avatarPreview.onerror = function() {
+            console.error(`Failed to load avatar image: ${avatarPath}`);
+            // Set a default image or show an error message
+            avatarPreview.src = '/static/avatars/default.png';
+        };
+    }
+
+    prevButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        currentAvatarId = currentAvatarId > 1 ? currentAvatarId - 1 : totalAvatars;
+        updateAvatarDisplay();
+    });
+
+    nextButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        currentAvatarId = currentAvatarId < totalAvatars ? currentAvatarId + 1 : 1;
+        updateAvatarDisplay();
+    });
+
+    // Initialize first avatar
+    updateAvatarDisplay();
+});
+</script>
+{% endblock %} 
